@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %} Online Examination System {% endblock %} {% block content %}
+<script lang="javascript">
+
+</script>
+<h1>Student Login</h1>
+
+<form action="student" method="POST">
+    <p>
+        Name: <br> <input type="text" name="name" required> <br> <br>
+        USN: <br> <input type="text" name="usn" required>
+    </p>
+    <small>{{ msg }}</small> <br>
+    <button type="submit">Start Test</button>
+</form>
+<script>
+    localStorage.timeRemaining = 0;
+</script>
+{% endblock %}

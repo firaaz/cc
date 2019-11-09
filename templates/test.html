@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %} Online Examination System {% endblock %} {% block content %}
+<h1> Instructions for exams</h1>
+<h2>
+    <ul>
+        <li>The test consists of {{ n }} MCQ with four options each</li>
+        <li>If you don't know the answers, just walk out. There's no point in asking anyone </li>
+        <li>It's not the time to think in the exam hall. Just bend your heads and write here.</li>
+        <li>Please keep an eye on the timer. The answers will be submitted automatically after the time runs out.</li>
+        <li>Don't create nuisance in the exam hall.</li>
+        <li>If you don't know anything, start praying to God.</li>
+        <li> Dont waste time by helping others to answer their questions.</li>
+    </ul>
+</h2>
+<!-- <h2>You may start exam in <span id="counter2">{{ time }}</span> seconds</h2> -->
+<a href="/questions"><button class="btn btn-primary" id="button2">Start exam</button></a> 
+<!-- <script>
+    var interval = setInterval(counter, 1000);
+    function counter(){
+        var button = document.querySelector("#button2");
+        var span = document.querySelector("#counter2");
+        var count = span.textContent * 1 - 1;
+        span.textContent = count;
+        if (count <= 0) {
+            button.disabled = false;
+            clearInterval(interval)
+        }
+    }
+</script> -->
+{% endblock %}

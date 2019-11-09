@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% block title %} Online Examination System {% endblock %} {% block content %}
+<h1>Modifying Questions</h1>
+<form action="/modify" method='POST'>
+    <input type="hidden" name="qno" value="{{ qno }}">
+    <h3> Question: </h3><input type="textbox" name="qname" size="50" required value="{{ q }}"> <br>
+    <h3>Options(select the correct option)</h3>
+    <p> <input type="radio" name="answer" value="a" {% if ans == "a" %} checked {% endif %} required> <input type="text" name="a" required value="{{ a }}"> <br>
+        <input type="radio" name="answer" value="b" {% if ans == "b" %} checked {% endif %} > <input type="text" name="b" required value="{{ b }}"> <br>
+        <input type="radio" name="answer" value="c" {% if ans == "c" %} checked {% endif %}> <input type="text" name="c" required value="{{ c }}"> <br>
+        <input type="radio" name="answer" value="d" {% if ans == "d" %} checked {% endif %}> <input type="text" name="d" required value="{{ d }}"> <br> <br>
+        <button type="submit">Modify question</button>
+    </p>
+</form>
+{% endblock %}

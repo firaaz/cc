@@ -1,0 +1,78 @@
+
+{% extends "base.html" %} {% block title %} Online Examination System {% endblock %} {% block content %}
+{% if loggedin %}
+<h1>Performance Result sede s</h1>
+
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+<script>
+am4core.ready(function() {
+
+am4core.useTheme(am4themes_animated);
+
+var chart = am4core.create("chartdiv", am4charts.XYChart);
+
+chart.exporting.menu = new am4core.ExportMenu();
+
+var data = {{sdata|safe}};
+console.log(data);
+
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.dataFields.category = "name";
+categoryAxis.renderer.minGridDistance = 30;
+
+
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+valueAxis.min = 0;
+valueAxis.max = 100;
+valueAxis.renderer.minGridDistance = 10;
+
+var columnSeries = chart.series.push(new am4charts.ColumnSeries());
+columnSeries.name = "Income";
+columnSeries.dataFields.valueY = "p";
+columnSeries.dataFields.categoryX = "name";
+
+columnSeries.columns.template.tooltipText = "{name} {valueY}"
+columnSeries.columns.template.propertyFields.fillOpacity = "fillOpacity";
+columnSeries.columns.template.propertyFields.stroke = "stroke";
+columnSeries.columns.template.propertyFields.strokeWidth = "strokeWidth";
+columnSeries.columns.template.propertyFields.strokeDasharray = "columnDash";
+columnSeries.tooltip.label.textAlign = "middle";
+
+chart.data = data;
+});
+</script>
+<table style="width:100%">
+<tr>
+    <th>Name</th>
+    <th>USN</th>
+    <th>Percentage</th>
+</tr>
+	<script>
+	var data = {{sdata|safe}};
+	for (i=0; i < data.length; i++) {
+		document.write("<tr>");
+		document.write("<th>" + data[i]['name'] + "</th>");
+		document.write("<th>" + data[i]['usn'] + "</th>");
+		document.write("<th>" + data[i]['p'] + "</th>");
+		document.write("</tr>");
+	}
+	</script>
+</table>
+<div id="chartdiv"></div>
+{% else %}
+sede
+<h1>Teacher login </h1>
+<form action="/teacher" method="POST">
+    <p>
+        Email: <br> <input type="email" name="email" required> <br> <br>
+        Password: <br> <input type="password" name="password" required> <br>
+        <p style="color: red" >{{ stir }}</p>
+    </p>
+    <button type="submit">Login</button>
+</form>
+{% endif %}
+{% endblock %}
