@@ -111,7 +111,7 @@ def test():
     # s1 = START_TIME
     # s2 = time.strftime('%H:%M:%S')
     # FMT = '%H:%M:%S'
-    # tdelta = datetime.strptime(s1, FMT) - datetime.strptime(s2, FMT)    
+    # tdelta = datetime.strptime(s1, FMT) - datetime.strptime(s2, FMT)
     qu = len(list(db.student.find({})))
     return render_template('test.html', n=qu)
 
@@ -123,7 +123,7 @@ def dels():
 @app.route('/modq', methods= ['GET', 'POST'])
 def modq():
     if request.method == "POST":
-        quno = request.form['quno']    
+        quno = request.form['quno']
         return redirect('/modify?no={}'.format(str(quno)))
 
 @app.route('/modify', methods= ['GET', 'POST'])
@@ -164,14 +164,28 @@ def results():
     print(list(db.student.find({'usn':{'$exists':'true'}})))
     return render_template('results.html',sdata=json.dumps(data), loggedin=True)
 
-@app.route('/upload', methods = ['POST'])  
-def upload():  
-    if request.method == 'POST':  
-        f = request.files['file'].filename 
-        print(f.endswith(".csv"))
-        #df = pd.read_excel(f)
-        #f.save(f.filename)
-        return render_template(("teacher", loggedin=True, uploaded=True))
+@app.route('/upload', methods = ['POST'])
+def upload():
+    if request.method == 'POST':
+        f = request.files['file']
+        filename = f.filename
+        checker = filename.endswith(".csv") or filename.endswith(".xlsx")
+        if (checker):
+            f.save(filename)
+            if filename.endswith(".csv"):
+                df = pd.read_csv(filename)
+            if filename.endswith(".xlsx"):
+                df = pd.read_excel(filename)
+            name, _, _ = filename.partition(".")
+            json_filename = name + ".json"
+            df.to_json(json_filename)
+            jdf = open(json_filename).read()
+            data = json.loads(jdf)
+            db.parent_details.insert(data)
+
+            return render_template("/teacher.html", loggedin=True, uploaded=True)
+        return render_template("/teacher.html", loggedin=True, uploaded=False)
+
 
 
 @app.errorhandler(404)

@@ -12,7 +12,7 @@
     <a href="/dels"> <button>delete all student data</button> </a>
     <hr>
     <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" />  
+        <input type="file" name="file" />
         <br/> <br/>
         <input type = "submit" value="Upload" style="color:black">
     </form>
@@ -46,10 +46,13 @@
 </form>
 <script type="text/javascript">
     var isUploaded = "{{uploaded}}";
-    if(isUploaded) {
+    if(isUploaded == "True") {
         alert("Uploaded Successfully");
-        isUploaded = False;
+        isUploaded = "False";
     }
+	else if(isUploaded == "False") {
+		alert("Please only upload csv or xlxs");
+	}
 </script>
 {% else %}
 <h1>Teacher login </h1>
