@@ -6,6 +6,8 @@ from hashlib import sha256
 import json
 import pandas as pd
 import xlrd
+import smtplib
+from email.mime.text import MIMEText
 
 app=Flask(__name__)
 app.config['SECRET_KEY']=b'N\x83Y\x99\x04\xc9\xcfI\xb7\xfc\xce\xd1\xcf\x01\xa8\xccr\xbb&\x1b\x11\xac\xc7V'
@@ -14,6 +16,10 @@ app.config['MAX_CONTENT_PATH']=1024
 client = pymongo.MongoClient("127.0.0.1",27017)
 db = client.mongo_exam
 
+s = smtplib.SMTP_SSL('smtp.gmail.com')
+s.set_debuglevel(1)
+sender = 'nitte.examinations@gmail.com'
+s.login("nitte.examinations@gmail.com","Nitte@123")
 
 @app.route('/')
 @app.route('/index')
@@ -62,7 +68,6 @@ def student():
 def questions():
     if request.cookies.get('stest') == "started":
         qu = [list(i.values()) for i in list(db.question.find())]
-        
         return render_template('questions.html', questions=qu, test=True, time=25)
     return redirect('/index')
 
@@ -160,9 +165,41 @@ def results():
     for i in data:
         del i['_id']
     data.sort(key = (lambda x: x['p']))
-    print(data)
-    print(list(db.student.find({'usn':{'$exists':'true'}})))
     return render_template('results.html',sdata=json.dumps(data), loggedin=True)
+
+
+@app.route('/sendmails')
+def sendmails():
+    parents = list(db.parent_details.find({}))[0]
+    usn = list(parents['usn'].values())
+    emails = list(parents['parent-email'].values())
+    students = list(db.student.find({}))
+
+    mail = [{'usn' : usn[i], 'email' : emails[i]} for i in range(0,len(usn))]
+    students.sort(key = (lambda x: x['usn']))
+    mail.sort(key = (lambda x: x['usn']))
+
+    i = 0
+    for mail_info in mail:
+        if (students[i]['usn'] == mail_info['usn']):
+            mail_info['p'] = students[i]['p']
+        else:
+            mail_info['p'] = None
+        msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
+        recipients = mail_info['email']
+        print(mail_info)
+        msg['Subject'] = "Marks"
+        msg['From'] = sender
+        msg['To'] = recipients
+        s.sendmail(sender, recipients, msg.as_string())
+        i += 1
+
+    if request.cookies.get('loggedin')=="True":
+        n = len(list(db.question.find()))
+        m = len(list(db.student.find()))
+        return render_template('teacher.html',loggedin=True,no=str(n),sno=str(m),qno = list(range(n)))
+    return render_template('teacher.html',loggedin=False,no=str(n),sno=str(m),qno = list(range(n)))
+
 
 @app.route('/upload', methods = ['POST'])
 def upload():
