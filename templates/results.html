@@ -1,7 +1,7 @@
 
 {% extends "base.html" %} {% block title %} Online Examination System {% endblock %} {% block content %}
 {% if loggedin %}
-<h1>Performance Result sede s</h1>
+<h1>Performance Result </h1>
 
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
 <script src="https://www.amcharts.com/lib/4/charts.js"></script>
@@ -45,13 +45,6 @@ columnSeries.tooltip.label.textAlign = "middle";
 chart.data = data;
 });
 </script>
-<aside>No of questions added : {{ no }}
-    <hr>
-    <form action="/semdmail" method="POST">
-        <button type="submit" style="color: black">Send Email</button>
-    </form>
-    <hr>
-</aside>
 <table style="width:100%">
 <tr>
     <th>Name</th>
@@ -69,6 +62,13 @@ chart.data = data;
 	}
 	</script>
 </table>
+<aside>
+    <hr>
+    <form action="/semdmail" method="POST">
+        <button type="submit" style="color: black">Send Email</button>
+    </form>
+    <hr>
+</aside>
 <div id="chartdiv"></div>
 {% else %}
 <h1>Teacher login </h1>
