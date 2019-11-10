@@ -168,7 +168,7 @@ def results():
     return render_template('results.html',sdata=json.dumps(data), loggedin=True)
 
 
-@app.route('/sendmails')
+@app.route('/sendmails', methods=['POST'])
 def sendmails():
     parents = list(db.parent_details.find({}))[0]
     usn = list(parents['usn'].values())
