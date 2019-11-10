@@ -45,6 +45,13 @@ columnSeries.tooltip.label.textAlign = "middle";
 chart.data = data;
 });
 </script>
+<aside>No of questions added : {{ no }}
+    <hr>
+    <form action="/semdmail" method="POST">
+        <button type="submit" style="color: black">Send Email</button>
+    </form>
+    <hr>
+</aside>
 <table style="width:100%">
 <tr>
     <th>Name</th>
