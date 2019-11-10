@@ -181,19 +181,21 @@ def sendmails():
 
     i = 0
     for mail_info in mail:
-        if (students[i]['usn'] == mail_info['usn']):
-            mail_info['p'] = students[i]['p']
-            msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
-        else:
+        try:
+            if (students[i]['usn'] == mail_info['usn']):
+                mail_info['p'] = students[i]['p']
+                msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
+        except:
             mail_info['p'] = None
             msg = MIMEText("""your ward was absent""")
-        recipients = mail_info['email']
-        print(mail_info)
-        msg['Subject'] = "Marks"
-        msg['From'] = sender
-        msg['To'] = recipients
-        s.sendmail(sender, recipients, msg.as_string())
-        i += 1
+        finally:
+            recipients = mail_info['email']
+            print(mail_info)
+            msg['Subject'] = "Marks"
+            msg['From'] = sender
+            msg['To'] = recipients
+            s.sendmail(sender, recipients, msg.as_string())
+            i += 1
 
     if request.cookies.get('loggedin')=="True":
         n = len(list(db.question.find()))
