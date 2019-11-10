@@ -183,9 +183,10 @@ def sendmails():
     for mail_info in mail:
         if (students[i]['usn'] == mail_info['usn']):
             mail_info['p'] = students[i]['p']
+            msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
         else:
             mail_info['p'] = None
-        msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
+            msg = MIMEText("""your ward was absent""")
         recipients = mail_info['email']
         print(mail_info)
         msg['Subject'] = "Marks"
