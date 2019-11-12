@@ -10,39 +10,37 @@ import smtplib
 from email.mime.text import MIMEText
 
 app=Flask(__name__)
-app.config['SECRET_KEY']=b'N\x83Y\x99\x04\xc9\xcfI\xb7\xfc\xce\xd1\xcf\x01\xa8\xccr\xbb&\x1b\x11\xac\xc7V'
-app.config['MAX_CONTENT_PATH']=1024
+app.config['SECRET_KEY'] = b'N\x83Y\x99\x04\xc9\xcfI\xb7\xfc\xce\xd1\xcf\x01\xa8\xccr\xbb&\x1b\x11\xac\xc7V'
+app.config['MAX_CONTENT_PATH'] = 1024
 
-client = pymongo.MongoClient("127.0.0.1",27017)
+client = pymongo.MongoClient("127.0.0.1", 27017)
 db = client.mongo_exam
 
 s = smtplib.SMTP_SSL('smtp.gmail.com')
 s.set_debuglevel(1)
 sender = 'nitte.examinations@gmail.com'
-s.login("nitte.examinations@gmail.com","Nitte@123")
+s.login("nitte.examinations@gmail.com", "Nitte@123")
 
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template('index.html')
 
-@app.route('/teacher', methods=['GET','POST'])
+@app.route('/teacher', methods=['GET', 'POST'])
 def teacher():
-    if request.cookies.get('loggedin')=="True":
+    if request.cookies.get('loggedin') == "True":
         n = len(list(db.question.find()))
         m = len(list(db.student.find()))
-        return render_template('teacher.html',loggedin=True,no=str(n),sno=str(m),qno = list(range(n)))
+        return render_template('teacher.html', loggedin=True,no=str(n),sno=str(m),qno = list(range(n)))
     if request.method == 'POST':
         email = request.form['email']
         pw = sha256(request.form['password'].encode()).hexdigest()
         print(pw)
         a = list(db.teacher.find({"email":email}))
         if len(a) == 0:
-            return render_template('teacher.html',msg="Wrong username or password")
-        if a[0]['password']==pw:
             n = len(list(db.question.find()))
             m = len(list(db.student.find()))
-            resp = make_response(render_template('teacher.html',loggedin=True,no=str(n),sno=str(m),qno = list(range(n))))
+            resp = make_response(render_template('teacher.html', loggedin=True, no=str(n), sno=str(m), qno=list(range(n))))
             resp.set_cookie('loggedin','True')
             return resp
         else:
@@ -56,8 +54,8 @@ def student():
         usn = request.form['usn']
         all_usn = [i['usn'] for i in list(db.student.find({}))]
         if usn in all_usn:
-            return render_template('student.html',msg="USN already present in database")
-        db.student.insert({"name":name,"usn":usn})
+            return render_template('student.html', msg="USN already present in database")
+        db.student.insert({"name":name, "usn":usn})
         resp = make_response(redirect('/test'))
         resp.set_cookie('usn',usn)
         resp.set_cookie('stest','started')
@@ -149,7 +147,7 @@ def modify():
     question=c[int(qu)-1]
     return render_template('modq.html',q=question['q'],a = question['a'],b = question['b'],c = question['a'],d = question['d'],qno=qu)
 
-@app.route('/mite', methods = ['GET','POST'])
+@app.route('/mite', methods=['GET', 'POST'])
 def mite():
     global START_TIME
     if request.method == "POST":
@@ -178,30 +176,42 @@ def sendmails():
     mail = [{'usn' : usn[i], 'email' : emails[i]} for i in range(0,len(usn))]
     students.sort(key = (lambda x: x['usn']))
     mail.sort(key = (lambda x: x['usn']))
+    #  print(mail)
+    #  print("###########")
+    #  print(students)
 
     i = 0
     for mail_info in mail:
         try:
             if (students[i]['usn'] == mail_info['usn']):
+                #  print("normal execution")
+                #  print(mail_info['email'])
                 mail_info['p'] = students[i]['p']
                 msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
-        except:
-            mail_info['p'] = None
-            msg = MIMEText("""your ward was absent""")
+            else:
+                #  print("except")
+                #  print(mail_info['email'])
+                mail_info['p'] = None
+                msg = MIMEText("""your ward was absent""")
+
+
+        except IndexError:
+            #  print("index error")
+            break
+
         finally:
             recipients = mail_info['email']
-            print(mail_info)
             msg['Subject'] = "Marks"
             msg['From'] = sender
             msg['To'] = recipients
-            s.sendmail(sender, recipients, msg.as_string())
             i += 1
+            #  s.sendmail(sender, recipients, msg.as_string())
 
-    if request.cookies.get('loggedin')=="True":
+    if request.cookies.get('loggedin') == "True":
         n = len(list(db.question.find()))
         m = len(list(db.student.find()))
-        return render_template('teacher.html',loggedin=True,no=str(n),sno=str(m),qno = list(range(n)))
-    return render_template('teacher.html',loggedin=False,no=str(n),sno=str(m),qno = list(range(n)))
+        return render_template('teacher.html', loggedin=True,no=str(n),sno=str(m),qno = list(range(n)))
+    return render_template('teacher.html', loggedin=False,no=str(n),sno=str(m),qno = list(range(n)))
 
 
 @app.route('/upload', methods = ['POST'])
@@ -211,6 +221,8 @@ def upload():
         filename = f.filename
         checker = filename.endswith(".csv") or filename.endswith(".xlsx")
         if (checker):
+            db.student.delete_many({})
+            result_list = list()
             f.save(filename)
             if filename.endswith(".csv"):
                 df = pd.read_csv(filename)
@@ -221,11 +233,18 @@ def upload():
             df.to_json(json_filename)
             jdf = open(json_filename).read()
             data = json.loads(jdf)
-            db.parent_details.insert(data)
+            for key in data.keys():
+                for data_key in data[key].keys():
+                    try:
+                        result_list[int(data_key)][key] = data[key][data_key]
+                    except IndexError:
+                        result_list.append({})
+                        result_list[int(data_key)][key] = data[key][data_key]
+            for result in result_list:
+                db.student.insert(result)
 
             return render_template("/teacher.html", loggedin=True, uploaded=True)
         return render_template("/teacher.html", loggedin=True, uploaded=False)
-
 
 
 @app.errorhandler(404)
