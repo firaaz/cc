@@ -8,6 +8,7 @@ import pandas as pd
 import xlrd
 import smtplib
 from email.mime.text import MIMEText
+from datetime import datetime
 
 app=Flask(__name__)
 app.config['SECRET_KEY'] = b'N\x83Y\x99\x04\xc9\xcfI\xb7\xfc\xce\xd1\xcf\x01\xa8\xccr\xbb&\x1b\x11\xac\xc7V'
@@ -178,16 +179,21 @@ def results():
 
 @app.route('/sendmails', methods=['POST'])
 def sendmails():
+    time = datetime.now()
+    dt = time.strftime("%d/%m/%Y %H:%M:%S")
+    print(dt)
 
     students = list(db.student.find({}))
 
     for student in students:
+
         #  print(student)
         if student['p']:
-            msg = MIMEText("""your ward,{} of usn: {}
-                           has secured {}%""".format(student['name'], student['usn'], student['p']))
+            msg = MIMEText("""Dear parent,
+                your ward,{} with usn {} has secured {}% for the test conducted on {}""".format(student['name'], student['usn'], student['p'], dt))
         else:
-            msg = MIMEText("""your ward, {} of usn: {} was absent""".format(student['name'], student['usn']))
+            msg = MIMEText("""Dear parent,
+                your ward, {} with usn {} was absent for the test conducted on {}""".format(student['name'], student['usn'], dt))
         recipients = student['email']
         msg['Subject'] = "Marks"
         msg['From'] = sender
