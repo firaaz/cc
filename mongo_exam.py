@@ -166,12 +166,15 @@ def mite():
 
 @app.route('/results')
 def results():
-    data = [i for i in list(db.student.find({}))]
-    for i in data:
+    data = []
+    data_old = [i for i in list(db.student.find({}))]
+    for i in data_old:
         del i['_id']
+        if i['p'] == None:
+            continue
+        data.append(i)
     data.sort(key = (lambda x: x['p']))
     return render_template('results.html',sdata=json.dumps(data), loggedin=True)
-
 
 @app.route('/sendmails', methods=['POST'])
 def sendmails():
@@ -179,11 +182,12 @@ def sendmails():
     students = list(db.student.find({}))
 
     for student in students:
-        print(student)
+        #  print(student)
         if student['p']:
-            msg = MIMEText("""your ward has secured {}%""".format(student['p']))
+            msg = MIMEText("""your ward,{} of usn: {}
+                           has secured {}%""".format(student['name'], student['usn'], student['p']))
         else:
-            msg = MIMEText("""your ward was absent""")
+            msg = MIMEText("""your ward, {} of usn: {} was absent""".format(student['name'], student['usn']))
         recipients = student['email']
         msg['Subject'] = "Marks"
         msg['From'] = sender
