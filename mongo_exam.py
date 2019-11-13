@@ -38,6 +38,8 @@ def teacher():
         print(pw)
         a = list(db.teacher.find({"email":email}))
         if len(a) == 0:
+            return render_template('teacher.html', msg="Wrong username or password")
+        if a[0]['password']:
             n = len(list(db.question.find()))
             m = len(list(db.student.find()))
             resp = make_response(render_template('teacher.html', loggedin=True, no=str(n), sno=str(m), qno=list(range(n))))
@@ -47,15 +49,20 @@ def teacher():
             return render_template('teacher.html',stir="Invalid Credentials")
     return render_template('teacher.html')
 
+all_usn = []
 @app.route('/student', methods=['GET','POST'])
 def student():
     if request.method == 'POST' :
         name = request.form['name']
         usn = request.form['usn']
-        all_usn = [i['usn'] for i in list(db.student.find({}))]
-        if usn in all_usn:
-            return render_template('student.html', msg="USN already present in database")
-        db.student.insert({"name":name, "usn":usn})
+        print(all_usn)
+        students_usn = list(db.student.find({}))
+        s_usn = [i['usn'] for i in students_usn]
+        print(s_usn)
+        if usn in all_usn or usn not in s_usn:
+            return render_template('student.html', msg="Invalid Credentials")
+        all_usn.append(usn)
+        #  db.student.insert({"name":name, "usn":usn})
         resp = make_response(redirect('/test'))
         resp.set_cookie('usn',usn)
         resp.set_cookie('stest','started')
@@ -168,44 +175,20 @@ def results():
 
 @app.route('/sendmails', methods=['POST'])
 def sendmails():
-    parents = list(db.parent_details.find({}))[0]
-    usn = list(parents['usn'].values())
-    emails = list(parents['parent-email'].values())
+
     students = list(db.student.find({}))
 
-    mail = [{'usn' : usn[i], 'email' : emails[i]} for i in range(0,len(usn))]
-    students.sort(key = (lambda x: x['usn']))
-    mail.sort(key = (lambda x: x['usn']))
-    #  print(mail)
-    #  print("###########")
-    #  print(students)
-
-    i = 0
-    for mail_info in mail:
-        try:
-            if (students[i]['usn'] == mail_info['usn']):
-                #  print("normal execution")
-                #  print(mail_info['email'])
-                mail_info['p'] = students[i]['p']
-                msg = MIMEText("""your ward has secured {}%""".format(mail_info['p']))
-            else:
-                #  print("except")
-                #  print(mail_info['email'])
-                mail_info['p'] = None
-                msg = MIMEText("""your ward was absent""")
-
-
-        except IndexError:
-            #  print("index error")
-            break
-
-        finally:
-            recipients = mail_info['email']
-            msg['Subject'] = "Marks"
-            msg['From'] = sender
-            msg['To'] = recipients
-            i += 1
-            #  s.sendmail(sender, recipients, msg.as_string())
+    for student in students:
+        print(student)
+        if student['p']:
+            msg = MIMEText("""your ward has secured {}%""".format(student['p']))
+        else:
+            msg = MIMEText("""your ward was absent""")
+        recipients = student['email']
+        msg['Subject'] = "Marks"
+        msg['From'] = sender
+        msg['To'] = recipients
+        s.sendmail(sender, recipients, msg.as_string())
 
     if request.cookies.get('loggedin') == "True":
         n = len(list(db.question.find()))
