@@ -74,7 +74,7 @@ def student():
 def questions():
     if request.cookies.get('stest') == "started":
         qu = [list(i.values()) for i in list(db.question.find())]
-        return render_template('questions.html', questions=qu, test=True, time=25)
+        return render_template('questions.html', questions=qu, test=True, time=125)
     return redirect('/index')
 
 @app.route('/logout', methods=['GET','POST'])
@@ -118,13 +118,14 @@ def submit():
 
 @app.route('/test',methods = ['GET','POST'])
 def test():
-    # global START_TIME
-    # s1 = START_TIME
-    # s2 = time.strftime('%H:%M:%S')
-    # FMT = '%H:%M:%S'
-    # tdelta = datetime.strptime(s1, FMT) - datetime.strptime(s2, FMT)
+    global START_TIME
+    s1 = START_TIME
+    s2 = time.strftime('%H:%M:%S')
+    FMT = '%H:%M:%S'
+    tdelta = datetime.strptime(s1, FMT) - datetime.strptime(s2, FMT)
+    print(tdelta.total_seconds())
     qu = len(list(db.student.find({})))
-    return render_template('test.html', n=qu)
+    return render_template('test.html', n=qu, time=int(tdelta.total_seconds()))
 
 @app.route('/dels')
 def dels():

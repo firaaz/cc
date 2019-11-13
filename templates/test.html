@@ -11,19 +11,22 @@
         <li> Dont waste time by helping others to answer their questions.</li>
     </ul>
 </h2>
-<!-- <h2>You may start exam in <span id="counter2">{{ time }}</span> seconds</h2> -->
+ <h2>You may start exam in <span id="counter2">{{ time }}</span> seconds</h2> 
 <a href="/questions"><button class="btn btn-primary" id="button2">Start exam</button></a> 
-<!-- <script>
+<script>
+    var button = document.querySelector("#button2");
+    button.disabled = true;
     var interval = setInterval(counter, 1000);
     function counter(){
-        var button = document.querySelector("#button2");
+        //var button = document.querySelector("#button2");
         var span = document.querySelector("#counter2");
         var count = span.textContent * 1 - 1;
         span.textContent = count;
         if (count <= 0) {
             button.disabled = false;
             clearInterval(interval)
+            localStorage.timeRemaining = 125;
         }
     }
-</script> -->
+</script> 
 {% endblock %}
